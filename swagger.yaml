@@ -1,14 +1,136 @@
-swagger: '2.0'
+swagger: "2.0"
 info:
   title: Bank Argent API documentation
-  description: Contains all available API endpoints in this codebase
-  version: '1.0.0'
-  termsOfService: 'http://swagger.io/terms/'
+  description: Contains all available API endpoints in this codebase and for the transactions functionalities
+  version: "1.0.0"
+  termsOfService: "http://swagger.io/terms/"
 host: localhost:3001
 basePath: /api/v1
 schemes:
   - http
 paths:
+  /user/account:
+    get:
+      security:
+        - Bearer: []
+      tags:
+        - Account Module
+      summary: Find accounts by user
+      description: Display a list of accounts
+      parameters:
+        - in: header
+          name: Authorization
+          description: Attach Bearer JWT user token
+          type: string
+          required: true
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: Successful operation
+          schema:
+            $ref: "#/definitions/AccountsResponse"
+        "400":
+          description: Invalid Field
+        "500":
+          description: Internal Server Error
+  /account/category:
+    get:
+      tags:
+        - Account Module
+      summary: List of transaction's categories
+      description: Display a list of categories
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: Successful operation
+          schema:
+            $ref: "#/definitions/TransactionCategoryResponse"
+        "400":
+          description: Catgories not found
+        "500":
+          description: Internal Server Error
+  /user/{accountId}/transactions/{currentMonth}:
+    get:
+      security:
+        - Bearer: []
+      tags:
+        - Account Module
+      summary: Find user transactions by account ID for the current month
+      description: Display a list of transactions for a specific account
+      operationId: "getCurrentTransactionsByAccountId"
+      parameters:
+        - name: "accountId"
+          in: "path"
+          description: "ID of account to be fetched for transactions displaying"
+          required: true
+          type: "string"
+        - name: "currentMonth"
+          in: "path"
+          description: "Number of the current month to be fetched"
+          required: true
+          type: "string"
+        - in: header
+          name: Authorization
+          description: Attach Bearer JWT user token
+          type: string
+          required: true
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: Successful operation
+          schema:
+            $ref: "#/definitions/TransactionsResponse"
+        "400":
+          description: Invalid ID or Month Number
+        "404":
+          description: Transactions not found
+        "500":
+          description: Internal Server Error
+    put:
+      security:
+        - Bearer: []
+      tags:
+        - Account Module
+      summary: Update transactions informations (category, notes)
+      description: Updating informations to a specific transaction
+      parameters:
+        - name: "accountId"
+          in: "path"
+          description: "ID of account to be fetched for transactions displaying"
+          required: true
+          type: "string"
+        - name: "currentMonth"
+          in: "path"
+          description: "Number of the current month to be fetched"
+          required: true
+          type: "string"
+        - in: header
+          name: Authorization
+          description: Attach Bearer JWT user token
+          type: string
+          required: true
+        - in: body
+          name: body
+          description: category ID and notes
+          required: true
+          schema:
+            $ref: "#/definitions/TransactionsInfos"
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: Successful operation
+          schema:
+            $ref: "#/definitions/TransactionsAPIResponse"
+        "400":
+          description: Invalid ID or Month Number
+        "404":
+          description: Transactions not found
+        "500":
+          description: Internal Server Error
   /user/login:
     post:
       tags:
@@ -21,17 +143,17 @@ paths:
           description: Login Payload
           required: true
           schema:
-            $ref: '#/definitions/Login'
+            $ref: "#/definitions/Login"
       produces:
         - application/json
       responses:
-        '200':
+        "200":
           description: Login Successfully
           schema:
-            $ref: '#/definitions/LoginResponse'
-        '400':
+            $ref: "#/definitions/LoginResponse"
+        "400":
           description: Invalid Fields
-        '500':
+        "500":
           description: Internal Server Error
   /user/signup:
     post:
@@ -45,17 +167,17 @@ paths:
           description: Signup Payload
           required: true
           schema:
-            $ref: '#/definitions/User'
+            $ref: "#/definitions/User"
       produces:
         - application/json
       responses:
-        '200':
+        "200":
           description: Signup Successfully
           schema:
-            $ref: '#/definitions/ApiResponse'
-        '400':
+            $ref: "#/definitions/ApiResponse"
+        "400":
           description: Invalid Fields
-        '500':
+        "500":
           description: Internal Server Error
   /user/profile:
     post:
@@ -69,17 +191,18 @@ paths:
         - in: header
           name: Authorization
           description: Attach Bearer JWT token
+          type: string
           required: true
       produces:
         - application/json
       responses:
-        '200':
+        "200":
           description: User profile retrieved successully
           schema:
-            $ref: '#/definitions/ApiResponse'
-        '400':
+            $ref: "#/definitions/ApiResponse"
+        "400":
           description: Invalid Fields
-        '500':
+        "500":
           description: Internal Server Error
     put:
       security:
@@ -92,23 +215,24 @@ paths:
         - in: header
           name: Authorization
           description: Attach Bearer JWT token
+          type: string
           required: true
         - in: body
           name: body
           description: Update user profile attributes
           required: true
           schema:
-            $ref: '#/definitions/UserProfile'
+            $ref: "#/definitions/UserProfile"
       produces:
         - application/json
       responses:
-        '200':
+        "200":
           description: User profile retrieved successully
           schema:
-            $ref: '#/definitions/ApiResponse'
-        '400':
+            $ref: "#/definitions/ApiResponse"
+        "400":
           description: Invalid Fields
-        '500':
+        "500":
           description: Internal Server Error
 securityDefinitions:
   Bearer:
@@ -116,6 +240,25 @@ securityDefinitions:
     name: Authorization
     in: header
 definitions:
+  Accounts:
+    properties:
+      userId:
+        type: string
+        description: user id
+  Transactions:
+    properties:
+      accountId:
+        type: string
+        description: account id
+  TransactionsInfos:
+    type: object
+    properties:
+      notes:
+        type: string
+        description: transaction notes
+      categoryId:
+        type: string
+        description: category Id
   User:
     properties:
       email:
@@ -152,6 +295,25 @@ definitions:
             type: string
           email:
             type: string
+  TransactionsAPIResponse:
+    type: object
+    properties:
+      status:
+        type: integer
+      message:
+        type: string
+      body:
+        type: object
+        properties:
+          id:
+            type: string
+            description: transaction id
+          notes:
+            type: string
+            description: transaction notes
+          categoryId:
+            type: string
+            description: transaction category ID
   LoginResponse:
     type: object
     properties:
@@ -163,4 +325,58 @@ definitions:
       firstName:
         type: string
       lastName:
+        type: string
+  AccountsResponse:
+    type: object
+    properties:
+      idUser:
+        type: string
+      accountid:
+        type: string
+      type:
+        type: string
+      accountNumber:
+        type: string
+      amount:
+        type: string
+      currency:
+        type: string
+      status:
+        type: string
+  TransactionsResponse:
+    type: object
+    properties:
+      userId:
+        type: string
+        description: user ID
+      accountId:
+        type: string
+        description: account id
+      date:
+        type: string
+        description: transaction date
+      description:
+        type: string
+        description: transaction description
+      amount:
+        type: string
+        description: transaction amount
+      currency:
+        type: string
+        description: transaction currency (USD, EUR,...)
+      balance:
+        type: string
+        description: new account's amount
+      categoryId:
+        type: string
+        description: category Id
+      notes:
+        type: string
+        description: transaction notes
+  TransactionCategoryResponse:
+    type: object
+    properties:
+      categoryId:
+        type: string
+      label:
         type: string
